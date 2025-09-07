@@ -6,7 +6,7 @@
     "app/api/screenshot/**": {
       "memory": 1024,
       "maxDuration": 60,
-  "includeFiles": "chromium-bin/**"
+      "includeFiles": "node_modules/@sparticuz/chromium/bin/**"
     }
   }
 }
