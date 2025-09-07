@@ -1,9 +1,50 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { NextRequest, NextResponse } from "next/server";
+import fs from "fs";
+import path from "path";
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
   const urlParam = searchParams.get("url");
+  const debug = searchParams.get("debug");
+
+  // If debug mode was requested, return environment and packaging diagnostics early
+  if (debug) {
+    const expectedRel = path.join("node_modules", "@sparticuz", "chromium", "bin");
+    const expectedAbs = path.resolve(process.cwd(), expectedRel);
+    const exists = fs.existsSync(expectedAbs);
+    let listing: string[] = [];
+    if (exists) {
+      try {
+        listing = fs.readdirSync(expectedAbs);
+      } catch {}
+    }
+
+    let execPath: string | null = null;
+    let execErr: string | null = null;
+    try {
+      const chromium = (await import("@sparticuz/chromium")).default;
+      execPath = await chromium.executablePath();
+    } catch (e: any) {
+      execErr = e?.message || String(e);
+    }
+
+    const payload = {
+      cwd: process.cwd(),
+      chromiBinExpectedRel: expectedRel,
+      chromiBinExpectedAbs: expectedAbs,
+      chromiBinExists: exists,
+      chromiBinListing: listing,
+      CHROMIUM_BIN_env: process.env.CHROMIUM_BIN ?? null,
+      chromiumExecutablePath: execPath,
+      chromiumExecutablePathError: execErr,
+    };
+
+    return new NextResponse(JSON.stringify(payload, null, 2), {
+      headers: { "Content-Type": "application/json" },
+    });
+  }
+
   if (!urlParam) {
     return new NextResponse("Please provide a URL.", { status: 400 });
   }
@@ -34,14 +75,36 @@ export async function GET(request: NextRequest) {
       launchOptions: any = {
         headless: true,
       };
+    
 
     if (isVercel) {
       const chromium = (await import("@sparticuz/chromium")).default;
       puppeteer = await import("puppeteer-core");
+
+      // Diagnostic: try to resolve the expected bin folder and list contents if missing.
+      const expectedRel = path.join("node_modules", "@sparticuz", "chromium", "bin");
+      const expectedAbs = path.resolve(process.cwd(), expectedRel);
+      let execPath: string | null = null;
+      try {
+        execPath = await chromium.executablePath();
+      } catch (e: any) {
+        const exists = fs.existsSync(expectedAbs);
+        let listing: string[] = [];
+        if (exists) {
+          try {
+            listing = fs.readdirSync(expectedAbs);
+          } catch {}
+        }
+
+        const diag = `chromium.executablePath() failed: ${e?.message || e}\nexpectedAbs=${expectedAbs}\nexists=${exists}\nlisting=${JSON.stringify(listing)}`;
+        // Surface a more helpful error to the client for debugging deployment packaging issues.
+        return new NextResponse(`Chromium packaging error: ${diag}`, { status: 500 });
+      }
+
       launchOptions = {
         ...launchOptions,
         args: chromium.args,
-        executablePath: await chromium.executablePath(),
+        executablePath: execPath,
       };
     } else {
       puppeteer = await import("puppeteer");
