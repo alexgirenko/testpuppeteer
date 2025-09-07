@@ -1,7 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 
-const src = path.resolve(__dirname, '..', 'node_modules', '@sparticuz', 'chromium', 'bin');
+const src = path.resolve(__dirname, '..', 'node_modules', '@sparticuz', 'chromium-min', 'bin');
 const dest = path.resolve(__dirname, '..', 'chromium-bin');
 
 console.log('copy-chromium-bin: src=', src);

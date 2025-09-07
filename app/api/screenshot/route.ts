@@ -23,7 +23,7 @@ export async function GET(request: NextRequest) {
     let execPath: string | null = null;
     let execErr: string | null = null;
     try {
-      const chromium = (await import("@sparticuz/chromium")).default;
+      const chromium = (await import("@sparticuz/chromium-min")).default;
       execPath = await chromium.executablePath();
     } catch (e: any) {
       execErr = e?.message || String(e);
@@ -78,7 +78,7 @@ export async function GET(request: NextRequest) {
     
 
     if (isVercel) {
-      const chromium = (await import("@sparticuz/chromium")).default;
+      const chromium = (await import("@sparticuz/chromium-min")).default;
       puppeteer = await import("puppeteer-core");
 
       // Diagnostic: try to resolve the expected bin folder and list contents if missing.
