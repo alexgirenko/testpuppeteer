@@ -1,12 +1,12 @@
 {
   "env": {
-    "CHROMIUM_BIN": "/var/task/node_modules/@sparticuz/chromium/bin"
+    "CHROMIUM_BIN": "/var/task/chromium-bin"
   },
   "functions": {
     "app/api/screenshot/**": {
       "memory": 1024,
       "maxDuration": 60,
-  "includeFiles": "node_modules/@sparticuz/chromium/**"
+  "includeFiles": "chromium-bin/**"
     }
   }
 }
