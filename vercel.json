@@ -1,4 +1,7 @@
 {
+  "env": {
+    "CHROMIUM_BIN": "/var/task/node_modules/@sparticuz/chromium/bin"
+  },
   "functions": {
     "app/api/screenshot/**": {
       "memory": 1024,
@@ -6,10 +9,7 @@
       "includeFiles": [
         "node_modules/@sparticuz/chromium/**",
         "node_modules/puppeteer-core/**"
-      ],
-      "env": {
-        "CHROMIUM_BIN": "/var/task/node_modules/@sparticuz/chromium/bin"
-      }
+      ]
     }
   }
 }
